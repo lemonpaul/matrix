@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Matrices</h1>
+    <table style="width: 100%;">
+        {% for i in range(5) %}
+        <tr>
+        {% for j in range(5) %}
+            <td>
+                {% if (page - 1) * per_page + 5 * i + j < total %}
+                    {% set array = matrices[5*i+j].to_array() %}
+                    $$\begin{pmatrix}{% for column in range(array|length - 1)        %}
+                                     {%     for row in range(array[0]|length - 1)    %}
+                                     {{         array[column][row]                  }}&
+                                     {%     endfor                                   %}
+                                     {{     array[column][array[0]|length - 1]     }}\\
+                                     {% endfor                                       %}
+                                     {% for row in range(array[0]|length - 1)        %}
+                                     {{     array[array|length - 1][row]            }}&
+                                     {% endfor                                       %}
+                                     {{ array[array|length - 1][array[0]|length - 1] }}\end{pmatrix}$$
+                {% endif %}
+            </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> Previous
+                </a>
+            </li>
+            <li>
+                {{ page }}/{{ pages }}
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    Next <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

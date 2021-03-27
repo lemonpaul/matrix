@@ -1,0 +1,41 @@
+app:
+  module: wsgi:application
+  master: 1
+  # enable-threads: 1
+  vacuum: 1
+  # strict: 1
+  # need-app: 1
+  auto-procname: 1
+  buffer-size: 8192
+  post-buffering: 8192
+  # master-fifo: /tmp/uwsgi.fifo
+  pidfile: /tmp/uwsgi.pid
+  # harakiri-verbose: 1
+  max-requests: 10000
+  max-worker-lifetime: 21600
+  # reload-on-rss: 2048
+  # worker-reload-mercy: 30
+  lazy: 1
+  lazy-apps: 1
+  touch-reload: /app/touch_reload
+  # touch-workers-reload: uwsgi-workers
+  # die-on-term: 1
+  wsgi-disable-file-wrapper: 1
+  # limit-post: 104857600
+  # memory-report: 1
+  # reaper: 1
+  # close-on-exec: 1
+  # honour-stdin: 1
+  catch-exceptions: 1
+  reload-on-exception: 1
+  # stats: :8017
+  # stats-http: 1
+  # py-autoreload: 1
+  disable-logging: 1
+  # enable-metrics: 1
+  # log-date: 1
+
+  http: 0.0.0.0:5000
+  processes: 2
+  harakiri: 600
+  py-autoreload: 1
