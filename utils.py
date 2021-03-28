@@ -231,27 +231,6 @@ def init(height, width, n_threads):
             print(f'Computing H-classes for {w}x{h} matrices...')
 
             if n_threads < 1 << w * h and n_threads > 1:
-                # array = [1, 2, 3, 4, 5, 6, 7, 8]
-
-                # while len(array) > 1:
-                #     jobs = []
-
-                #     for idx in range(0, len(array), 2):
-                #          print(f'Job {idx} received {array[idx]} and {array[idx+1]}.')
-                #          jobs.append(queue.enqueue(test, array[idx], array[idx+1]))
-
-                #     while len(queue) or registry.count:
-                #         continue
-                #     else:
-                #         time.sleep(0.1)
-
-                #     reduced_array = []
-                #     for job in jobs:
-                #         print(f'Job {jobs.index(job)} returned {job.result}.')
-                #         reduced_array.append(job.result)
-                #     
-                #     array = reduced_array
-                        
                 n_matrices = 1 << w * h
                 s_batch = int(n_matrices / n_threads)
 
@@ -276,19 +255,16 @@ def init(height, width, n_threads):
                     for idx in range(0, len(size_h_classes), 2):
                         jobs.append(queue.enqueue(reduce_h_classes, size_h_classes[idx], \
                                                   size_h_classes[idx+1]))
-                        print(f'Job {idx} received {size_h_classes[idx]} and '
-                              f'{size_h_classes[idx+1]}.')
 
                     while len(queue) or registry.count:
                         continue
-                    else:
-                        time.sleep(0.1)
+
+                    while any([job.result == None for job in jobs]):
+                        continue
 
                     reduced_h_classes = []
                     for job in jobs:
                         reduced_h_classes.append(job.result)
-                        print(f'Job {jobs.index(job)} returned {job.result}')
-                        
                     
                     size_h_classes = reduced_h_classes
                     
