@@ -163,19 +163,23 @@ def partial_h_class(matrices):
     return h_classes
 
 def reduce_h_classes(h_classes_1, h_classes_2):
-    print('breakpoint #1')
+    s_h_class = len(h_classes_2)
     for h_class_1 in h_classes_1:
         matrix_1 = h_class_1[0]
-        for h_class_2 in h_classes_2:
-            matrix_2 = h_class_2[0]
+        for idx in range(0, s_h_class):
+            matrix_2 = h_classes_2[idx][0]
             if row_space(matrix_1) == row_space(matrix_2) and \
                     column_space(matrix_1) == column_space(matrix_2):
-                h_class_1.extend(h_class_2)
-            break
+                h_classes_2[idx].extend(h_class_1)
+                break
         else:
-            h_classes_1.append(h_class_2)
-    # print('breakpoint #8')
-    return h_classes_1
+            h_classes_2.append(h_class_1)
+
+    return h_classes_2
+
+
+def test(a, b):
+    return a + b
 
 
 def clear_all():
@@ -194,9 +198,9 @@ def summ(a, b):
     return a
 
 
-@managment_commands.option('-h', '--height', dest='height', default=3)
-@managment_commands.option('-w', '--width', dest='width', default=3)
-@managment_commands.option('-t', '--threads', dest='n_threads', default=1)
+@managment_commands.option('-h', '--height', dest='height', default=2)
+@managment_commands.option('-w', '--width', dest='width', default=2)
+@managment_commands.option('-t', '--threads', dest='n_threads', default=8)
 def init(height, width, n_threads):
     registry = StartedJobRegistry(queue=queue)
 
@@ -226,7 +230,28 @@ def init(height, width, n_threads):
             
             print(f'Computing H-classes for {w}x{h} matrices...')
 
-            if n_threads != 1:
+            if n_threads < 1 << w * h and n_threads > 1:
+                # array = [1, 2, 3, 4, 5, 6, 7, 8]
+
+                # while len(array) > 1:
+                #     jobs = []
+
+                #     for idx in range(0, len(array), 2):
+                #          print(f'Job {idx} received {array[idx]} and {array[idx+1]}.')
+                #          jobs.append(queue.enqueue(test, array[idx], array[idx+1]))
+
+                #     while len(queue) or registry.count:
+                #         continue
+                #     else:
+                #         time.sleep(0.1)
+
+                #     reduced_array = []
+                #     for job in jobs:
+                #         print(f'Job {jobs.index(job)} returned {job.result}.')
+                #         reduced_array.append(job.result)
+                #     
+                #     array = reduced_array
+                        
                 n_matrices = 1 << w * h
                 s_batch = int(n_matrices / n_threads)
 
@@ -249,9 +274,10 @@ def init(height, width, n_threads):
                     jobs = []
 
                     for idx in range(0, len(size_h_classes), 2):
-                        print(f'Job {idx} received {size_h_classes[idx]} and {size_h_classes[idx+1]}.')
                         jobs.append(queue.enqueue(reduce_h_classes, size_h_classes[idx], \
                                                   size_h_classes[idx+1]))
+                        print(f'Job {idx} received {size_h_classes[idx]} and '
+                              f'{size_h_classes[idx+1]}.')
 
                     while len(queue) or registry.count:
                         continue
@@ -260,10 +286,13 @@ def init(height, width, n_threads):
 
                     reduced_h_classes = []
                     for job in jobs:
-                        print(f'Job {jobs.index(job)} returned {job.result}.')
                         reduced_h_classes.append(job.result)
+                        print(f'Job {jobs.index(job)} returned {job.result}')
+                        
                     
                     size_h_classes = reduced_h_classes
+                    
+                size_h_classes = size_h_classes[0]
                
             else:
                 size_h_classes = partial_h_class(matrices)
