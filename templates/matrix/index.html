@@ -10,7 +10,7 @@
         {% for j in range(5) %}
         <td>
             {% if start + 5 * i + j < end %}
-                {% set array = matrices[5 * i + j].to_array() %}
+                {% set array = matrices[5 * i + j].as_list() %}
                 $$\begin{pmatrix}{% for column in range(array|length - 1)        %}
                                  {%     for row in range(array[0]|length - 1)    %}
                                  {{         array[column][row]                  }}&

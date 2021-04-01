@@ -4,7 +4,6 @@ from app import managment_commands, db, queue, redis_conn, config
 from models import Matrix, H_class, L_class, R_class, D_class
 
 from rq import Connection, Worker
-from rq.registry import StartedJobRegistry
 
 def join(vector1, vector2):
     if len(vector1) != len(vector2):
@@ -90,7 +89,7 @@ def multiplication(matrix1, matrix2):
         return None
 
     n = len(matrix1)
-    m = len(matrix2[1])
+    m = len(matrix2[0])
 
     result = list()
     for i in range(m):
@@ -116,6 +115,10 @@ def intersection(l_class_id_1, l_class_id_2):
     return Matrix.query.filter(Matrix.id.in_(meet_set))
 
 
+def is_idempotent(matrix):
+    return len(matrix) == len(matrix[0]) and multiplication(matrix, matrix) == matrix
+
+
 def find_alchemy_matrix(matrix):
     from models import Matrix
 
@@ -129,6 +132,7 @@ def find_alchemy_matrix(matrix):
 
     return Matrix.query.filter(Matrix.height == h, Matrix.width == w,
                                Matrix.body == body).first()
+
 
 def get_matrix(height, width, body):
     data = [[]] * height
@@ -202,8 +206,6 @@ def summ(a, b):
 @managment_commands.option('-w', '--width', dest='width', default=2)
 @managment_commands.option('-t', '--threads', dest='n_threads', default=8)
 def init(height, width, n_threads):
-    registry = StartedJobRegistry(queue=queue)
-
     height = int(height)
     width = int(width)
     n_threads = int(n_threads)

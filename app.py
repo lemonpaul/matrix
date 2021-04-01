@@ -107,10 +107,10 @@ def class_show(class_name, class_id):
     matrices = db.session.query(Matrix).join(model).filter(model.id == class_id).paginate(
         page, current_app.config['MATRICES_PER_PAGE'], False
     )
-    next_url = url_for('main.class_show', class_name=class_name, class_id=class_id, \
+    next_url = url_for('class_show', class_name=class_name, class_id=class_id, \
                        page=matrices.next_num) \
         if matrices.has_next else None
-    prev_url = url_for('main.class_show', class_name=class_name, class_id=class_id, \
+    prev_url = url_for('class_show', class_name=class_name, class_id=class_id, \
                        page=matrices.prev_num) \
         if matrices.has_prev else None
 

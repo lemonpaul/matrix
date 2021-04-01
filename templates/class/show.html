@@ -3,12 +3,12 @@
 {% block app_content %}
     <h1>Matrices</h1>
     <table style="width: 100%;">
-        {% for i in range(5) %}
+        {% for i in range(4) %}
         <tr>
         {% for j in range(5) %}
             <td>
                 {% if (page - 1) * per_page + 5 * i + j < total %}
-                    {% set array = matrices[5*i+j].to_array() %}
+                    {% set array = matrices[5*i+j].as_list() %}
                     $$\begin{pmatrix}{% for column in range(array|length - 1)        %}
                                      {%     for row in range(array[0]|length - 1)    %}
                                      {{         array[column][row]                  }}&

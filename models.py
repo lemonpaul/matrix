@@ -35,7 +35,7 @@ class Matrix(db.Model):
         "order_by": id
     }
 
-    def to_array(self):
+    def as_list(self):
         data = [[]] * self.height
         for k in range(self.height):
             data[k] = [0] * self.width
