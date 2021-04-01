@@ -258,7 +258,7 @@ def init(height, width, n_threads):
                         jobs.append(queue.enqueue(reduce_h_classes, size_h_classes[idx], \
                                                   size_h_classes[idx+1]))
 
-                    while len(queue) or registry.count:
+                    while len(queue):
                         continue
 
                     while any([job.result == None for job in jobs]):
