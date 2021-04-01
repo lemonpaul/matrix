@@ -42,8 +42,7 @@
             {% elif class_name == 'D' %}
                 {% set class = d_class %} 
             {% endif %}
-            <td onmouseenter="class_show('{{class_name}}', {{class.id}}, {{class.matrices|length}})"
-                onmouseleave="class_hide()" style="border: 1px solid;">
+            <td style="border: 1px solid;">
                 <a href="{{ url_for('class_show', class_name=class_name,
                     class_id=class.id) }}">
                     {{ class.matrices|length }}
