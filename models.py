@@ -44,7 +44,7 @@ class Matrix(db.Model):
                 shift = self.width * self.height - (i * self.width + j) - 1
                 if 1 << shift & self.body:
                     data[i][j] = 1
-        return data   
+        return data
 
     def __repr__(self):
         return '<Matrix {}x{}>'.format(self.width, self.height)

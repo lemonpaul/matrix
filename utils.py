@@ -5,6 +5,15 @@ from models import Matrix, H_class, L_class, R_class, D_class
 
 from rq import Connection, Worker
 
+
+def width(matrix):
+    return len(matrix[0])
+
+
+def height(matrix):
+    return len(matrix)
+
+
 def join(vector1, vector2):
     if len(vector1) != len(vector2):
         return None
@@ -25,6 +34,16 @@ def transpose(matrix):
         transpose_matrix[i] = [vector[i] for vector in matrix]
 
     return transpose_matrix
+
+
+def complement(matrix):
+    height = len(matrix)
+
+    complement_matrix = [[]] * height
+    for i in range(height):
+        complement_matrix[i] = [int(not value) for value in matrix[i]]
+
+    return complement_matrix
 
 
 def space(matrix):
@@ -81,10 +100,11 @@ def isomorphic(lattice1, lattice2):
     unordered_degree_sequence2 = [sum(row) for row in lattice2]
     if unordered_degree_sequence1[0] != unordered_degree_sequence2[0]:
         return False
-    return sorted(unordered_degree_sequence1) == sorted(unordered_degree_sequence2)
+    return sorted(unordered_degree_sequence1) == \
+        sorted(unordered_degree_sequence2)
 
 
-def multiplication(matrix1, matrix2):
+def conj_multiplication(matrix1, matrix2):
     if len(matrix1[0]) != len(matrix2):
         return None
 
@@ -104,6 +124,55 @@ def multiplication(matrix1, matrix2):
     return result
 
 
+def disj_multiplication(matrix1, matrix2):
+    if len(matrix1[0]) != len(matrix2):
+        return None
+
+    n = len(matrix1)
+    m = len(matrix2[0])
+
+    result = list()
+    for i in range(m):
+        result.append([0] * n)
+
+    for i in range(n):
+        for j in range(m):
+            v1 = matrix1[i]
+            v2 = [v[j] for v in matrix2]
+            result[i][j] = int(all(join(v1, v2)))
+
+    return result
+
+
+def i(matrix):
+    return complement(
+        transpose(
+            conj_multiplication(
+                matrix,
+                complement(
+                    transpose(matrix)
+                )
+            )
+        )
+    )
+
+
+def i_adjency_matrix():
+    from models import D_class
+    d_classes = [[matrix.as_list() for matrix in d_class.matrices] for d_class in D_class.query]
+    d_size = len(d_classes)
+
+    adjency_matrix = [[]] * d_size
+    for idx in range(d_size):
+        adjency_matrix[idx] = [0] * d_size
+
+        for matrix in d_classes[idx]:
+            for d_class in filter(lambda d_class: i(matrix) in d_class, d_classes):
+                adjency_matrix[idx][d_classes.index(d_class)] = 1
+
+    return adjency_matrix
+
+
 def intersection(l_class_id_1, l_class_id_2):
     from models import Matrix, L_class
 
@@ -116,7 +185,8 @@ def intersection(l_class_id_1, l_class_id_2):
 
 
 def is_idempotent(matrix):
-    return len(matrix) == len(matrix[0]) and multiplication(matrix, matrix) == matrix
+    return len(matrix) == len(matrix[0]) and \
+        conj_multiplication(matrix, matrix) == matrix
 
 
 def find_alchemy_matrix(matrix):
@@ -166,6 +236,7 @@ def partial_h_class(matrices):
 
     return h_classes
 
+
 def reduce_h_classes(h_classes_1, h_classes_2):
     s_h_class = len(h_classes_2)
     for h_class_1 in h_classes_1:
@@ -187,7 +258,7 @@ def test(a, b):
 
 
 def clear_all():
-    print(f'Clearing old data...')
+    print('Clearing old data...')
 
     Matrix.query.delete()
     H_class.query.delete()
@@ -195,11 +266,6 @@ def clear_all():
     R_class.query.delete()
     D_class.query.delete()
     db.session.commit()
-
-
-def summ(a, b):
-    a = a + b
-    return a
 
 
 @managment_commands.option('-h', '--height', dest='height', default=2)
@@ -218,18 +284,18 @@ def init(height, width, n_threads):
 
     for h in range(1, height+1):
         for w in range(1, width+1):
-            
+
             matrices = []
 
             print(f'Initialization {1 << w * h} {w}x{h} matrices...')
 
-            for b in range (0, 1 << w * h):
+            for b in range(0, 1 << w * h):
                 matrix = get_matrix(h, w, b)
                 matrices.append(matrix)
 
                 alchemy_matrix = Matrix(width=w, height=h, body=b)
                 db.session.add(alchemy_matrix)
-            
+
             print(f'Computing H-classes for {w}x{h} matrices...')
 
             if n_threads < 1 << w * h and n_threads > 1:
@@ -240,44 +306,44 @@ def init(height, width, n_threads):
                 for idx in range(n_threads):
                     matrix_from = s_batch * idx
                     matrix_to = min((idx + 1) * s_batch, n_matrices)
-                    jobs.append(queue.enqueue(partial_h_class, matrices[matrix_from:matrix_to]))
+                    jobs.append(queue.enqueue(partial_h_class,
+                                              matrices[matrix_from:matrix_to]))
 
-                while len(queue) or registry.count:
+                while len(queue):
                     continue
-                else:
-                    time.sleep(0.1)
 
                 size_h_classes = []
                 for job in jobs:
                     size_h_classes.append(job.result)
-                
+
                 while len(size_h_classes) > 1:
                     jobs = []
 
                     for idx in range(0, len(size_h_classes), 2):
-                        jobs.append(queue.enqueue(reduce_h_classes, size_h_classes[idx], \
+                        jobs.append(queue.enqueue(reduce_h_classes,
+                                                  size_h_classes[idx],
                                                   size_h_classes[idx+1]))
 
                     while len(queue):
                         continue
 
-                    while any([job.result == None for job in jobs]):
+                    while any([job.result is None for job in jobs]):
                         continue
 
                     reduced_h_classes = []
                     for job in jobs:
                         reduced_h_classes.append(job.result)
-                    
+
                     size_h_classes = reduced_h_classes
-                    
+
                 size_h_classes = size_h_classes[0]
-               
+
             else:
                 size_h_classes = partial_h_class(matrices)
-               
+
             h_classes.extend(size_h_classes)
 
-    print(f'Computing L-classes...')
+    print('Computing L-classes...')
 
     l_classes = []
 
@@ -294,7 +360,7 @@ def init(height, width, n_threads):
             l_class.extend(h_class)
             l_classes.append(l_class)
 
-    print(f'Computing R-classes...')
+    print('Computing R-classes...')
 
     r_classes = []
 
@@ -311,7 +377,7 @@ def init(height, width, n_threads):
             r_class.extend(h_class)
             r_classes.append(r_class)
 
-    print(f'Computing D-classes...')
+    print('Computing D-classes...')
 
     d_classes = []
 
@@ -320,7 +386,9 @@ def init(height, width, n_threads):
         for d_class in d_classes:
             class_matrix = d_class[0]
 
-            r_class = next(filter(lambda r_class: class_matrix in r_class, r_classes))
+            r_class = next(
+                filter(lambda r_class: class_matrix in r_class, r_classes)
+            )
 
             if as_set(l_class) & as_set(r_class):
                 d_class.extend(l_class)
@@ -329,8 +397,8 @@ def init(height, width, n_threads):
             d_class = []
             d_class.extend(l_class)
             d_classes.append(d_class)
-    
-    print(f'Storing H-classes in database...')
+
+    print('Storing H-classes in database...')
 
     for h_class in h_classes:
         cls = H_class()
@@ -338,7 +406,7 @@ def init(height, width, n_threads):
             mtx = find_alchemy_matrix(matrix)
             mtx.h_class = cls
 
-    print(f'Storing L-classes in database...')
+    print('Storing L-classes in database...')
 
     for l_class in l_classes:
         cls = L_class()
@@ -346,7 +414,7 @@ def init(height, width, n_threads):
             mtx = find_alchemy_matrix(matrix)
             mtx.l_class = cls
 
-    print(f'Storing R-classes in database...')
+    print('Storing R-classes in database...')
 
     for r_class in r_classes:
         cls = R_class()
@@ -354,7 +422,7 @@ def init(height, width, n_threads):
             mtx = find_alchemy_matrix(matrix)
             mtx.r_class = cls
 
-    print(f'Storing D-classes in database...')
+    print('Storing D-classes in database...')
 
     for d_class in d_classes:
         cls = D_class()
@@ -365,7 +433,7 @@ def init(height, width, n_threads):
     db.session.commit()
 
     t_end = time.time()
-    
+
     print(f'Estimated time: {t_end - t_start} s.')
 
 
