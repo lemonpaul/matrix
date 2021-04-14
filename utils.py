@@ -159,7 +159,8 @@ def i(matrix):
 
 def i_adjency_matrix():
     from models import D_class
-    d_classes = [[matrix.as_list() for matrix in d_class.matrices] for d_class in D_class.query]
+    d_classes = [[matrix.as_list() for matrix in d_class.matrices]
+                 for d_class in D_class.query]
     d_size = len(d_classes)
 
     adjency_matrix = [[]] * d_size
@@ -167,7 +168,8 @@ def i_adjency_matrix():
         adjency_matrix[idx] = [0] * d_size
 
         for matrix in d_classes[idx]:
-            for d_class in filter(lambda d_class: i(matrix) in d_class, d_classes):
+            for d_class in filter(lambda d_class: i(matrix) in d_class,
+                                  d_classes):
                 adjency_matrix[idx][d_classes.index(d_class)] = 1
 
     return adjency_matrix
@@ -187,6 +189,43 @@ def intersection(l_class_id_1, l_class_id_2):
 def is_idempotent(matrix):
     return len(matrix) == len(matrix[0]) and \
         conj_multiplication(matrix, matrix) == matrix
+
+
+def is_regular(a):
+    from models import Matrix
+
+    if height(a) != width(a):
+        return False
+
+    matrices = [matrix.as_list() for matrix in Matrix.query]
+
+    matrices_x = filter(lambda m: width(m) == width(a) and
+                        height(m) == height(a), matrices)
+
+    for x in matrices_x:
+        if conj_multiplication(conj_multiplication(a, x), a) == a:
+            return True
+
+    return False
+
+
+def is_class_regular(cls):
+    return is_regular(cls[0])
+
+
+def not_regular_classes():
+    from models import D_class
+    d_classes = [[matrix.as_list() for matrix in d_class.matrices]
+                 for d_class in D_class.query]
+    d_size = len(d_classes)
+
+    not_regular_classes = []
+
+    for idx in range(d_size):
+        if not is_class_regular(d_classes[idx]):
+            not_regular_classes.append(idx)
+
+    return not_regular_classes
 
 
 def find_alchemy_matrix(matrix):
