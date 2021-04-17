@@ -236,9 +236,35 @@ def not_regular_classes():
 
     for idx in range(d_size):
         if not is_class_regular(d_classes[idx]):
-            not_regular_classes.append(idx)
+            not_regular_classes.append(idx+1)
 
     return not_regular_classes
+
+
+def inverse_classes():
+    from models import D_class
+
+    d_size = D_class.query.count()
+
+    inverse_classes = []
+
+    for idx in range(1, d_size+1):
+        inverse = True
+        for r_cls in D_class.query.get(idx).r_classes():
+            r_class = [matrix.as_list() for matrix in r_cls.matrices]
+            if len(list(filter(lambda m: is_idempotent(m),  r_class))) != 1:
+                inverse = False
+                break
+        for l_cls in D_class.query.get(idx).l_classes():
+            l_class = [matrix.as_list() for matrix in l_cls.matrices]
+            if len(list(filter(lambda m: is_idempotent(m),  l_class))) != 1:
+                inverse = False
+                break
+        if inverse:
+            inverse_classes.append(idx)
+
+    return inverse_classes
+
 
 
 def find_alchemy_matrix(matrix):
