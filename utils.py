@@ -70,6 +70,19 @@ def row_space(matrix):
     return space(matrix)
 
 
+def h_equivalent(matrix1, matrix2):
+    return row_space(matrix1) == row_space(matrix2) and \
+        column_space(matrix1) == column_space(matrix2)
+
+
+def l_equivalent(matrix1, matrix2):
+    return row_space(matrix1) == row_space(matrix2)
+
+
+def r_equivalent(matrix1, matrix2):
+        return column_space(matrix1) == column_space(matrix2)
+
+
 def comparable(vector1, vector2):
     if all(x <= y for x, y in zip(vector1, vector2)) or \
             all(x >= y for x, y in zip(vector1, vector2)):
@@ -265,8 +278,7 @@ def partial_h_class(matrices):
     for matrix in matrices:
         for h_class in h_classes:
             class_matrix = h_class[0]
-            if row_space(matrix) == row_space(class_matrix) and \
-                    column_space(matrix) == column_space(class_matrix):
+            if h_equivalent(matrix, class_matrix):
                 h_class.append(matrix)
                 break
         else:
@@ -290,10 +302,6 @@ def reduce_h_classes(h_classes_1, h_classes_2):
             h_classes_2.append(h_class_1)
 
     return h_classes_2
-
-
-def test(a, b):
-    return a + b
 
 
 def clear_all():
@@ -391,7 +399,7 @@ def init(height, width, n_threads):
 
         for l_class in l_classes:
             class_matrix = l_class[0]
-            if row_space(matrix) == row_space(class_matrix):
+            if l_equivalent(matrix, class_matrix):
                 l_class.extend(h_class)
                 break
         else:
@@ -408,7 +416,7 @@ def init(height, width, n_threads):
 
         for r_class in r_classes:
             class_matrix = r_class[0]
-            if column_space(matrix) == column_space(class_matrix):
+            if r_equivalent(matrix, class_matrix):
                 r_class.extend(h_class)
                 break
         else:
