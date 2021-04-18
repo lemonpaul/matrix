@@ -204,6 +204,18 @@ def is_idempotent(matrix):
         conj_multiplication(matrix, matrix) == matrix
 
 
+def is_primary_idempotent(matrix):
+    return width(matrix) == height(matrix) and \
+        conj_multiplication(matrix, matrix) == matrix and \
+        i(matrix) != matrix
+
+
+def is_secondary_idempotent(matrix):
+    return width(matrix) == height(matrix) and \
+        conj_multiplication(matrix, matrix) == matrix and \
+        i(matrix) == matrix
+
+
 def is_regular(a):
     from models import Matrix
 
