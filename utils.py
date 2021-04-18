@@ -80,7 +80,7 @@ def l_equivalent(matrix1, matrix2):
 
 
 def r_equivalent(matrix1, matrix2):
-        return column_space(matrix1) == column_space(matrix2)
+    return column_space(matrix1) == column_space(matrix2)
 
 
 def comparable(vector1, vector2):
@@ -278,7 +278,6 @@ def inverse_classes():
     return inverse_classes
 
 
-
 def find_alchemy_matrix(matrix):
     from models import Matrix
 
@@ -394,7 +393,7 @@ def init(height, width, n_threads):
                     jobs.append(queue.enqueue(partial_h_class,
                                               matrices[matrix_from:matrix_to]))
 
-                while len(queue):
+                while any([job.result is None for job in jobs]):
                     continue
 
                 size_h_classes = []
@@ -408,9 +407,6 @@ def init(height, width, n_threads):
                         jobs.append(queue.enqueue(reduce_h_classes,
                                                   size_h_classes[idx],
                                                   size_h_classes[idx+1]))
-
-                    while len(queue):
-                        continue
 
                     while any([job.result is None for job in jobs]):
                         continue
