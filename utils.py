@@ -158,15 +158,11 @@ def disj_multiplication(matrix1, matrix2):
 
 
 def i(matrix):
-    return complement(
-        transpose(
-            conj_multiplication(
-                matrix,
-                complement(
-                    transpose(matrix)
-                )
-            )
-        )
+    return disj_multiplication(
+        complement(
+            transpose(matrix)
+        ),
+        matrix
     )
 
 
@@ -516,6 +512,32 @@ def init(height, width, n_threads):
     t_end = time.time()
 
     print(f'Estimated time: {t_end - t_start} s.')
+
+
+@managment_commands.command
+def build_orbits():
+    print('Adjency matrix:')
+    dim = D_class.query.count()
+    adjency_matrix = []
+    regular_classes = []
+    d_classes = [[m.as_list() for m in d.matrices] for d in D_class.query.all()]
+    for k in range(dim):
+        adjency_matrix.append([])
+        for l in range(dim):
+            adjency_matrix[k].append(0)
+    for idx_1, d_class_1 in enumerate(d_classes):
+        if is_regular(d_class_1[0]):
+            regular_classes.append(idx_1+1)
+        for matrix in d_class_1:
+            i_matrix = i(matrix)
+            for idx_2, d_class_2 in enumerate(d_classes):
+                if i_matrix in d_class_2:
+                    adjency_matrix[idx_1][idx_2] = 1
+        print(f'{idx_1+1},{",".join(str(i) for i in adjency_matrix[idx_1])}')
+    print('Not regular classes:')
+    print(",".join(str(i) for i in not_regular_classes()))
+    print('Inverse classes:')
+    print(",".join(str(i) for i in inverse_classes()))
 
 
 @managment_commands.command
