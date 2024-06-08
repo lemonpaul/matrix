@@ -69,6 +69,7 @@ def is_secondary_idempotent(matrix):
         i(matrix) == matrix
 
 def get_matrix(height, width, body):
+    body = [int(sign) for sign in bin(body)[2:].zfill(height * width)]
     data = [[]] * height
     for k in range(height):
         data[k] = [0] * width
@@ -183,88 +184,3 @@ def complement(matrix):
         complement_matrix[i] = [not_(value) for value in matrix[i]]
 
     return complement_matrix
-
-
-height_ = 2
-width_ = 2
-
-matrices = []
-h_classes = []
-
-for h in range(1, height_+1):
-    for w in range(1, width_+1):
-        size_matrices = []
-        print(f'Initialization {w}x{h} matrices...')
-        
-        tuples_args = ([0, 0.5, 1], ) * (w * h)
-        tuples = list(itertools.product(*tuples_args))
-        
-        for t in tuples:
-            matrix = get_matrix(h, w, t)
-            size_matrices.append(matrix)
-
-        matrices.extend(size_matrices)
-
-        print(f'Computing H-classes for {w}x{h} matrices...')
-        
-        size_h_classes = partial_h_class(size_matrices)
-
-        h_classes.extend(size_h_classes)
-
-print('Computing L-classes...')
-
-l_classes = []
-
-for h_class in h_classes:
-    matrix = h_class[0]
-
-    for l_class in l_classes:
-        class_matrix = l_class[0]
-        if l_equivalent(matrix, class_matrix):
-            l_class.extend(h_class)
-            break
-    else:
-        l_class = []
-        l_class.extend(h_class)
-        l_classes.append(l_class)
-
-print('Computing R-classes...')
-
-r_classes = []
-
-for h_class in h_classes:
-    matrix = h_class[0]
-
-    for r_class in r_classes:
-        class_matrix = r_class[0]
-        if r_equivalent(matrix, class_matrix):
-            r_class.extend(h_class)
-            break
-    else:
-        r_class = []
-        r_class.extend(h_class)
-        r_classes.append(r_class)
-
-print('Computing D-classes...')
-
-d_classes = []
-
-for l_class in l_classes:
-    matrix = l_class[0]
-    for d_class in d_classes:
-        class_matrix = d_class[0]
-
-        r_class = next(
-            filter(lambda r_class: class_matrix in r_class, r_classes)
-        )
-
-        if as_set(l_class) & as_set(r_class):
-            d_class.extend(l_class)
-            break
-    else:
-        d_class = []
-        d_class.extend(l_class)
-        d_classes.append(d_class)
-
-d_class = d_classes[17]
-
