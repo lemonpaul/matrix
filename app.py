@@ -1,14 +1,10 @@
-import base64
 import matplotlib
-import networkx as nx
-import matplotlib.pyplot as plt
 
 from flask import Flask, render_template, request, url_for, current_app
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from importlib import import_module
-from io import BytesIO
 from redis import Redis
 from rq import Queue
 
@@ -57,19 +53,6 @@ def matrix_index():
                            total=matrices.total, next_url=next_url, prev_url=prev_url)
 
 
-@server.route('/poset')
-def poset():
-    G = nx.complete_graph(5)
-    nx.draw(G)
-
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    plt.clf()
-
-    data = base64.b64encode(img.getbuffer()).decode("ascii")
-    return render_template('poset.html', title='Partial order set of D-classes', data=data)
-
-
 @server.route('/explore/<string:class_name>')
 def explore_index(class_name):
     from models import D_class, intersection, height, width
@@ -114,6 +97,3 @@ def class_show(class_name, class_id):
     return render_template('class/show.html', class_name=class_name, matrices=matrices.items,
                            page=matrices.page, pages=matrices.pages, per_page=matrices.per_page,
                            total=matrices.total, next_url=next_url, prev_url=prev_url)
-
-
-import utils
