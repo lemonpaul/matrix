@@ -55,9 +55,7 @@ class H_class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     matrices = relationship('Matrix', back_populates='h_class')
 
-    __mapper_args__ = {
-        "order_by": id
-    }
+    mapper_args = {"default_order": [id]}
 
 
 class L_class(db.Model):
@@ -65,9 +63,7 @@ class L_class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     matrices = relationship('Matrix', back_populates='l_class')
 
-    __mapper_args__ = {
-        "order_by": id
-    }
+    mapper_args = {"default_order": [id]}
 
     def h_classes(self):
         return H_class.query.join(Matrix).join(L_class).filter_by(id=self.id).all()
@@ -78,9 +74,7 @@ class R_class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     matrices = relationship('Matrix', back_populates='r_class')
 
-    __mapper_args__ = {
-        "order_by": id
-    }
+    mapper_args = {"default_order": [id]}
 
     def h_classes(self):
         return H_class.query.join(Matrix).join(R_class).filter_by(id=self.id).all()
@@ -91,9 +85,7 @@ class D_class(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     matrices = relationship('Matrix', back_populates='d_class')
 
-    __mapper_args__ = {
-        "order_by": id
-    }
+    mapper_args = {"default_order": [id]}
 
     def h_classes(self):
         return H_class.query.join(Matrix).join(D_class).filter_by(id=self.id).all()

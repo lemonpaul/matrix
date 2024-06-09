@@ -2,12 +2,11 @@
 # coding=utf-8
 import time
 
-from rq import Connection, Worker
-
-from app import config, db, managment_commands, queue, redis_conn
+from app import db, managment_commands
 from models import D_class, H_class, L_class, Matrix, R_class
-from theorem import as_set, get_matrix, i, is_regular, l_equivalent, partial_h_class, r_equivalent
-from utils import clear_all, find_alchemy_matrix, inverse_classes, not_regular_classes, reduce_h_classes
+from utils import (as_set, clear_all, find_alchemy_matrix, get_matrix, i,
+                   inverse_classes, is_regular, l_equivalent,
+                   not_regular_classes, partial_h_class, r_equivalent)
 
 
 @managment_commands.option('-h', '--height', dest='height', default=2)
@@ -134,12 +133,6 @@ def init(height, width):
     t_end = time.time()
 
     print(f'Estimated time: {t_end - t_start} s.')
-
-@managment_commands.command
-def runworker():
-    with Connection(redis_conn):
-        worker = Worker(config['QUEUES'])
-        worker.work()
 
 @managment_commands.command
 def build_orbits():

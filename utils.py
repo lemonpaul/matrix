@@ -33,7 +33,6 @@ def transpose(matrix):
 
     return transpose_matrix
 
-
 def complement(matrix):
     height = len(matrix)
 

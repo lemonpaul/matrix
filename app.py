@@ -1,23 +1,14 @@
-import matplotlib
+from importlib import import_module
 
-from flask import Flask, render_template, request, url_for, current_app
+from flask import Flask, current_app, render_template, request, url_for
+from flask_bootstrap import Bootstrap
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
-from flask_bootstrap import Bootstrap
-from importlib import import_module
-from redis import Redis
-from rq import Queue
-
-
-matplotlib.use('Agg')
 
 server = Flask(__name__)
 
 server.config.from_object('config')
 config = server.config
-
-redis_conn = Redis(host=config['REDIS_HOST'])
-queue = Queue(connection=redis_conn)
 
 db = SQLAlchemy(server)
 
@@ -55,7 +46,7 @@ def matrix_index():
 
 @server.route('/explore/<string:class_name>')
 def explore_index(class_name):
-    from models import D_class, intersection, height, width
+    from models import D_class, height, intersection, width
 
     d_classes = D_class.query.all()
     return render_template('explore/index.html', title=class_name+'-classes',
