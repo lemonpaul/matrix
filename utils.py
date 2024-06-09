@@ -1,5 +1,3 @@
-import time
-
 from app import db
 from models import D_class, H_class, L_class, Matrix, R_class
 
@@ -155,6 +153,10 @@ def disj_multiplication(matrix1, matrix2):
 
 
 def i(matrix):
+    """
+    Отображение, ставящее каждой матрице A в соответсвие вторичный идемпотент
+    A'T U A.
+    """
     return disj_multiplication(
         complement(
             transpose(matrix)
@@ -164,7 +166,6 @@ def i(matrix):
 
 
 def i_adjency_matrix():
-    from models import D_class
     d_classes = [[matrix.as_list() for matrix in d_class.matrices]
                  for d_class in D_class.query]
     d_size = len(d_classes)
@@ -182,8 +183,6 @@ def i_adjency_matrix():
 
 
 def intersection(l_class_id_1, l_class_id_2):
-    from models import L_class, Matrix
-
     set_1 = {matrix.id for matrix in L_class.query.get(l_class_id_1).matrices}
     set_2 = {matrix.id for matrix in L_class.query.get(l_class_id_2).matrices}
 
@@ -210,8 +209,6 @@ def is_secondary_idempotent(matrix):
 
 
 def is_regular(a):
-    from models import Matrix
-
     if height(a) != width(a):
         return False
 
@@ -232,7 +229,6 @@ def is_class_regular(cls):
 
 
 def not_regular_classes():
-    from models import D_class
     d_classes = [[matrix.as_list() for matrix in d_class.matrices]
                  for d_class in D_class.query]
     d_size = len(d_classes)
@@ -247,8 +243,6 @@ def not_regular_classes():
 
 
 def inverse_classes():
-    from models import D_class
-
     d_size = D_class.query.count()
 
     inverse_classes = []
@@ -272,8 +266,6 @@ def inverse_classes():
 
 
 def find_alchemy_matrix(matrix):
-    from models import Matrix
-
     h = len(matrix)
     w = len(matrix[0])
 

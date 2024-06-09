@@ -9,9 +9,19 @@ from utils import (as_set, clear_all, find_alchemy_matrix, get_matrix, i,
                    not_regular_classes, partial_h_class, r_equivalent)
 
 
-@managment_commands.option('-h', '--height', dest='height', default=2)
-@managment_commands.option('-w', '--width', dest='width', default=2)
-def init(height, width):
+@managment_commands.option('-h', '--height', dest='height', default=3)
+@managment_commands.option('-w', '--width', dest='width', default=3)
+def init(height: int, width: int):
+    """
+    Вычислить и сохранить в БД классы Грина для полугруппы матриц максимальной
+    ширины width и высоты height.
+
+    height:
+        Максимальная высота матриц.
+
+    width:
+        Максимальная ширина матриц.
+    """
     height = int(height)
     width = int(width)
 
@@ -153,7 +163,7 @@ def build_orbits():
             for idx_2, d_class_2 in enumerate(d_classes):
                 if i_matrix in d_class_2:
                     adjency_matrix[idx_1][idx_2] = 1
-        print(f'{idx_1+1},{",".join(str(i) for i in adjency_matrix[idx_1])}')
+        print(f'{",".join(str(i) for i in adjency_matrix[idx_1])}')
     print('Not regular classes:')
     print(",".join(str(i) for i in not_regular_classes()))
     print('Inverse classes:')
