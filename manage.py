@@ -12,11 +12,9 @@ from utils import clear_all, find_alchemy_matrix, inverse_classes, not_regular_c
 
 @managment_commands.option('-h', '--height', dest='height', default=2)
 @managment_commands.option('-w', '--width', dest='width', default=2)
-@managment_commands.option('-t', '--threads', dest='n_threads', default=8)
-def init(height, width, n_threads):
+def init(height, width):
     height = int(height)
     width = int(width)
-    n_threads = int(n_threads)
 
     clear_all()
 
@@ -40,45 +38,7 @@ def init(height, width, n_threads):
 
             print(f'Computing H-classes for {w}x{h} matrices...')
 
-            if n_threads < 1 << w * h and n_threads > 1:
-                n_matrices = 1 << w * h
-                s_batch = int(n_matrices / n_threads)
-
-                jobs = []
-                for idx in range(n_threads):
-                    matrix_from = s_batch * idx
-                    matrix_to = min((idx + 1) * s_batch, n_matrices)
-                    jobs.append(queue.enqueue(partial_h_class,
-                                              matrices[matrix_from:matrix_to]))
-
-                while any([job.result is None for job in jobs]):
-                    continue
-
-                size_h_classes = []
-                for job in jobs:
-                    size_h_classes.append(job.result)
-
-                while len(size_h_classes) > 1:
-                    jobs = []
-
-                    for idx in range(0, len(size_h_classes), 2):
-                        jobs.append(queue.enqueue(reduce_h_classes,
-                                                  size_h_classes[idx],
-                                                  size_h_classes[idx+1]))
-
-                    while any([job.result is None for job in jobs]):
-                        continue
-
-                    reduced_h_classes = []
-                    for job in jobs:
-                        reduced_h_classes.append(job.result)
-
-                    size_h_classes = reduced_h_classes
-
-                size_h_classes = size_h_classes[0]
-
-            else:
-                size_h_classes = partial_h_class(matrices)
+            size_h_classes = partial_h_class(matrices)
 
             h_classes.extend(size_h_classes)
 
