@@ -1,9 +1,7 @@
 import time
 
-from app import managment_commands, db, queue, redis_conn, config
-from models import Matrix, H_class, L_class, R_class, D_class
-
-from rq import Connection, Worker
+from app import db
+from models import D_class, H_class, L_class, Matrix, R_class
 
 
 def width(matrix):
@@ -185,7 +183,7 @@ def i_adjency_matrix():
 
 
 def intersection(l_class_id_1, l_class_id_2):
-    from models import Matrix, L_class
+    from models import L_class, Matrix
 
     set_1 = {matrix.id for matrix in L_class.query.get(l_class_id_1).matrices}
     set_2 = {matrix.id for matrix in L_class.query.get(l_class_id_2).matrices}

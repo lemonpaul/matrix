@@ -1,6 +1,3 @@
-import itertools
-
-
 def width(matrix):
     return len(matrix[0])
 
