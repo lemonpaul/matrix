@@ -132,7 +132,7 @@ def comparable(vector1: list[Bool], vector2: list[Bool]) -> bool:
     return False
 
 
-def lattice(space_):
+def lattice(space_: Space):
     n = len(space_)
 
     lattice_ = list()
@@ -159,7 +159,10 @@ def isomorphic(lattice1, lattice2):
         sorted(unordered_degree_sequence2)
 
 
-def conj_multiplication(matrix1, matrix2):
+def conj_multiplication(matrix1: Matrix, matrix2: Matrix) -> Matrix:
+    """
+    Конъюнктивное произведение двух матриц.
+    """
     if len(matrix1[0]) != len(matrix2):
         return None
 
@@ -179,7 +182,10 @@ def conj_multiplication(matrix1, matrix2):
     return result
 
 
-def disj_multiplication(matrix1, matrix2):
+def disj_multiplication(matrix1: Matrix, matrix2: Matrix) -> Matrix:
+    """
+    Дизъюнктивное произведение двух матриц.
+    """
     if len(matrix1[0]) != len(matrix2):
         return None
 
@@ -213,8 +219,10 @@ def i(matrix):
 
 
 def i_adjency_matrix():
-    d_classes = [[matrix.as_list() for matrix in d_class.matrices]
-                 for d_class in D_class.query]
+    """
+    Матрица смежности орбит оторажения i.
+    """
+    d_classes = [[matrix.as_list() for matrix in d_class.matrices] for d_class in D_class.query]
     d_size = len(d_classes)
 
     adjency_matrix = [[]] * d_size
@@ -222,8 +230,7 @@ def i_adjency_matrix():
         adjency_matrix[idx] = [0] * d_size
 
         for matrix in d_classes[idx]:
-            for d_class in filter(lambda d_class: i(matrix) in d_class,
-                                  d_classes):
+            for d_class in filter(lambda d_class: i(matrix) in d_class, d_classes):
                 adjency_matrix[idx][d_classes.index(d_class)] = 1
 
     return adjency_matrix
