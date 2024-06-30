@@ -1,28 +1,51 @@
+from typing import Literal
+
 from app import db
-from models import D_class, H_class, L_class, Matrix, R_class
+from models import D_class, H_class, L_class
+from models import Matrix as SQLAMatrix
+from models import R_class
+
+type Bool = Literal[0, 1]
+type Matrix = list[list[Bool]]
+type Space = set[tuple[Bool, ...]]
 
 
-def width(matrix):
+def width(matrix: Matrix) -> int:
+    """
+    Количество столбцов в матрице.
+    """
     return len(matrix[0])
 
 
-def height(matrix):
+def height(matrix: Matrix) -> int:
+    """
+    Количество строк в матрице.
+    """
     return len(matrix)
 
 
-def join(vector1, vector2):
+def join(vector1: list[Bool], vector2: list[Bool]) -> list[Bool]:
+    """
+    Дизъюнкция двух векторов.
+    """
     if len(vector1) != len(vector2):
         return None
     return [e1 | e2 for e1, e2 in zip(vector1, vector2)]
 
 
-def meet(vector1, vector2):
+def meet(vector1: list[Bool], vector2: list[Bool]) -> list[Bool]:
+    """
+    Конъюнкция двух векторов.
+    """
     if len(vector1) != len(vector2):
         return None
     return [e1 & e2 for e1, e2 in zip(vector1, vector2)]
 
 
-def transpose(matrix):
+def transpose(matrix: Matrix) -> Matrix:
+    """
+    Возвращает транспонированную матрицу.
+    """
     width = len(matrix[0])
 
     transpose_matrix = [[]] * width
@@ -31,7 +54,10 @@ def transpose(matrix):
 
     return transpose_matrix
 
-def complement(matrix):
+def complement(matrix: Matrix) -> Matrix:
+    """
+    Возвращает сопряженную матрицу.
+    """
     height = len(matrix)
 
     complement_matrix = [[]] * height
@@ -41,7 +67,10 @@ def complement(matrix):
     return complement_matrix
 
 
-def space(matrix):
+def space(matrix: Matrix) -> set[tuple[Bool, ...]]:
+    """
+    Строит линейное пространство над строками матрицы.
+    """
     space = set([tuple(vector) for vector in matrix])
 
     n = len(matrix)
@@ -56,29 +85,47 @@ def space(matrix):
     return space
 
 
-def column_space(matrix):
+def column_space(matrix: Matrix) -> Space:
+    """
+    Возвращает пространство строк матрицы.
+    """
     transpose_matrix = transpose(matrix)
     return space(transpose_matrix)
 
 
-def row_space(matrix):
+def row_space(matrix: Matrix) -> Space:
+    """
+    Возвращает пространство столбцов матрицы.
+    """
     return space(matrix)
 
 
-def h_equivalent(matrix1, matrix2):
+def h_equivalent(matrix1: Matrix, matrix2: Matrix) -> bool:
+    """
+    Проверяет, что две матрицы принадлежат одному H-классу.
+    """
     return row_space(matrix1) == row_space(matrix2) and \
         column_space(matrix1) == column_space(matrix2)
 
 
-def l_equivalent(matrix1, matrix2):
+def l_equivalent(matrix1: Matrix, matrix2: Matrix) -> bool:
+    """
+    Проверяет, что две матрицы принадлежат одному L-классу.
+    """
     return row_space(matrix1) == row_space(matrix2)
 
 
-def r_equivalent(matrix1, matrix2):
+def r_equivalent(matrix1: Matrix, matrix2: Matrix) -> bool:
+    """
+    Проверяет, что две матрицы принадлежат одному R-классу.
+    """
     return column_space(matrix1) == column_space(matrix2)
 
 
-def comparable(vector1, vector2):
+def comparable(vector1: list[Bool], vector2: list[Bool]) -> bool:
+    """
+    Проверяет сравнимость двух бинарных векторов.
+    """
     if all(x <= y for x, y in zip(vector1, vector2)) or \
             all(x >= y for x, y in zip(vector1, vector2)):
         return True
@@ -188,7 +235,7 @@ def intersection(l_class_id_1, l_class_id_2):
 
     meet_set = set_1 & set_2
 
-    return Matrix.query.filter(Matrix.id.in_(meet_set))
+    return SQLAMatrix.query.filter(SQLAMatrix.id.in_(meet_set))
 
 
 def is_idempotent(matrix):
@@ -212,7 +259,7 @@ def is_regular(a):
     if height(a) != width(a):
         return False
 
-    matrices = [matrix.as_list() for matrix in Matrix.query]
+    matrices = [matrix.as_list() for matrix in SQLAMatrix.query]
 
     matrices_x = filter(lambda m: width(m) == width(a) and
                         height(m) == height(a), matrices)
@@ -265,7 +312,10 @@ def inverse_classes():
     return inverse_classes
 
 
-def find_alchemy_matrix(matrix):
+def find_sqla_matrix(matrix: list[list[Literal[0, 1]]]):
+    """
+    Найти матрицу в базе данных.
+    """
     h = len(matrix)
     w = len(matrix[0])
 
@@ -274,8 +324,8 @@ def find_alchemy_matrix(matrix):
         for j in range(w):
             body |= ((1 & matrix[i][j]) << (h * w - (i * w + j) - 1))
 
-    return Matrix.query.filter(Matrix.height == h, Matrix.width == w,
-                               Matrix.body == body).first()
+    return SQLAMatrix.query.filter(SQLAMatrix.height == h, SQLAMatrix.width == w,
+                               SQLAMatrix.body == body).first()
 
 
 def get_matrix(height, width, body):
@@ -327,9 +377,12 @@ def reduce_h_classes(h_classes_1, h_classes_2):
 
 
 def clear_all():
+    """
+    Удалить все данные из базы данных.
+    """
     print('Clearing old data...')
 
-    Matrix.query.delete()
+    SQLAMatrix.query.delete()
     H_class.query.delete()
     L_class.query.delete()
     R_class.query.delete()

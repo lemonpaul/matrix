@@ -4,7 +4,7 @@ import time
 
 from app import db, managment_commands
 from models import D_class, H_class, L_class, Matrix, R_class
-from utils import (as_set, clear_all, find_alchemy_matrix, get_matrix, i,
+from utils import (as_set, clear_all, find_sqla_matrix, get_matrix, i,
                    inverse_classes, is_regular, l_equivalent,
                    not_regular_classes, partial_h_class, r_equivalent)
 
@@ -111,7 +111,7 @@ def init(height: int, width: int):
     for h_class in h_classes:
         cls = H_class()
         for matrix in h_class:
-            mtx = find_alchemy_matrix(matrix)
+            mtx = find_sqla_matrix(matrix)
             mtx.h_class = cls
 
     print('Storing L-classes in database...')
@@ -119,7 +119,7 @@ def init(height: int, width: int):
     for l_class in l_classes:
         cls = L_class()
         for matrix in l_class:
-            mtx = find_alchemy_matrix(matrix)
+            mtx = find_sqla_matrix(matrix)
             mtx.l_class = cls
 
     print('Storing R-classes in database...')
@@ -127,7 +127,7 @@ def init(height: int, width: int):
     for r_class in r_classes:
         cls = R_class()
         for matrix in r_class:
-            mtx = find_alchemy_matrix(matrix)
+            mtx = find_sqla_matrix(matrix)
             mtx.r_class = cls
 
     print('Storing D-classes in database...')
@@ -135,7 +135,7 @@ def init(height: int, width: int):
     for d_class in d_classes:
         cls = D_class()
         for matrix in d_class:
-            mtx = find_alchemy_matrix(matrix)
+            mtx = find_sqla_matrix(matrix)
             mtx.d_class = cls
 
     db.session.commit()
